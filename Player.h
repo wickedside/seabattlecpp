@@ -9,6 +9,8 @@ protected:
     Board opponentBoard;
     void placeShip(int length, int count, const std::string& name);
     bool canPlaceShip(int x, int y, int length, char direction);
+    void autoPlaceShipsBasic();
+
 
 public:
     virtual ~Player() {}

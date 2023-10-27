@@ -64,3 +64,7 @@ void Player::placeShip(int size, int count, const std::string& description) {
         }
     }
 }
+
+void HumanPlayer::autoPlaceShips() {
+    autoPlaceShipsBasic();
+}

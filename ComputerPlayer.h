@@ -19,7 +19,7 @@ private:
     Mode shootingMode = Mode::RANDOM;
     std::vector<std::pair<int, int>> intelligentTargets; // возможные цели в интеллектуальном режиме
 
-    void generateRandomShips();
+    void autoPlaceShips();
     bool canPlaceShip(const int x, const int y, const char direction, const int size);
 
     std::pair<int, int> lastHit; // последнее попадание

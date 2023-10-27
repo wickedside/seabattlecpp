@@ -1,6 +1,5 @@
 #include "Board.h"
 #include "ComputerPlayer.h"
-#include <ctime>
 
 ComputerPlayer::ComputerPlayer() {}
 
@@ -54,31 +53,11 @@ std::pair<int, int> ComputerPlayer::chooseShootCoordinate() {
 
 void ComputerPlayer::placeShips() {
     // Рандомное размещение кораблей
-    generateRandomShips();
+    autoPlaceShips();
 }
 
-void ComputerPlayer::generateRandomShips() {
-    static int seedIncrementer = 37;
-    srand(time(0) + seedIncrementer++); // Увеличиваем сид, чтобы у каждого компьютера было уникальное размещение
-
-    // Массив возможных направлений корабля
-    const char directions[] = { 'h', 'v' };
-
-    for (int size = 4; size >= 1; --size) {
-        for (int count = 1; count <= 5 - size; ++count) {
-            bool placed = false;
-            while (!placed) {
-                int x = rand() % 10;
-                int y = rand() % 10;
-                char direction = directions[rand() % 2];
-
-                if (ownBoard.canPlaceShip(x, y, direction, size)) {
-                    ownBoard.placeShip(x, y, direction, size);
-                    placed = true;
-                }
-            }
-        }
-    }
+void ComputerPlayer::autoPlaceShips() {
+    autoPlaceShipsBasic();
 }
 
 void ComputerPlayer::addSurroundingCoordinates(int x, int y) {

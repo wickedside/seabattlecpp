@@ -21,13 +21,33 @@ void Game::start() {
     if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
         currentPlayer = &human;
         opponent = &computer1;
+
         if (placementMode == PlacementMode::MANUAL) {
             human.placeShips();
         }
         else {
-            human.placeShips();
+            std::cout << "Расставляем корабли игрока автоматически" << std::endl;
+            human.autoPlaceShips(); // вызываем метод автоматической расстановки
+            std::cout << "Корабли игрока расставлены" << std::endl;
+            std::cout << "Доска игрока:" << std::endl;
+            human.getOwnBoard().display();
         }
+
+        std::cout << "Расставляем корабли компьютера автоматически" << std::endl;
         computer1.placeShips();
+        std::cout << "Корабли компьютера расставлены" << std::endl;
+        std::cout << "Доска компьютера:" << std::endl;
+        computer1.getOwnBoard().display();
+        if (human.allShipsSunk()) {
+            std::cout << "Все корабли игрока потоплены до начала игры!" << std::endl;
+            return;
+        }
+
+        if (computer1.allShipsSunk()) {
+            std::cout << "Все корабли компьютера потоплены до начала игры!" << std::endl;
+            return;
+        }
+
         humanVsComputerLoop();
     }
     else {
