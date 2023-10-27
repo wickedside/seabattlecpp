@@ -123,16 +123,20 @@ void Game::switchPlayers() {
 }
 
 void Game::announceWinner() {
-    if (human.allShipsSunk()) {
-        std::cout << "Компьютер победил!" << std::endl;
-    }
-    else if (computer1.allShipsSunk()) {
-        std::cout << "Компьютер 2 победил!" << std::endl;
-    }
-    else if (computer2.allShipsSunk()) {
-        std::cout << "Компьютер 1 победил!" << std::endl;
+    if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
+        if (human.allShipsSunk()) {
+            std::cout << "Компьютер победил!" << std::endl;
+        }
+        else {
+            std::cout << "Вы победили!" << std::endl;
+        }
     }
     else {
-        std::cout << "Вы победили!" << std::endl;
+        if (computer1.allShipsSunk()) {
+            std::cout << "Компьютер 2 победил!" << std::endl;
+        }
+        else if (computer2.allShipsSunk()) {
+            std::cout << "Компьютер 1 победил!" << std::endl;
+        }
     }
 }
