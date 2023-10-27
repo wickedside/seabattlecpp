@@ -65,10 +65,9 @@ void Game::humanVsComputerLoop() {
         case ShipStatus::ALIVE:
         default:
             std::cout << "Промах!" << std::endl;
+            switchPlayers();
             break;
         }
-
-        switchPlayers();
     }
 }
 
@@ -94,10 +93,9 @@ void Game::computerVsComputerLoop() {
         case ShipStatus::ALIVE:
         default:
             std::cout << "Промах!" << std::endl;
+            switchPlayers();
             break;
         }
-
-        switchPlayers();
     }
 }
 
