@@ -9,37 +9,6 @@ Board::Board() {
     }
 }
 
-/*bool Board::isValidPlacement(const Ship& ship) const {
-    int x = ship.getStartCoordinate().first;
-    int y = ship.getStartCoordinate().second;
-    int len = ship.getLength();
-
-    if (ship.getDirection() == Direction::HORIZONTAL) {
-        if (y + len > BOARD_SIZE) return false;
-
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j < len + 1; j++) {
-                if (x + i >= 0 && x + i < BOARD_SIZE && y + j >= 0 && y + j < BOARD_SIZE) {
-                    if (grid[x + i][y + j] != ' ') return false;
-                }
-            }
-        }
-    }
-    else {
-        if (x + len > BOARD_SIZE) return false;
-
-        for (int i = -1; i < len + 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                if (x + i >= 0 && x + i < BOARD_SIZE && y + j >= 0 && y + j < BOARD_SIZE) {
-                    if (grid[x + i][y + j] != ' ') return false;
-                }
-            }
-        }
-    }
-
-    return true;
-}*/
-
 bool Board::addShip(const Ship& ship) {
     int x = ship.getStartCoordinate().first;
     int y = ship.getStartCoordinate().second;
@@ -116,13 +85,17 @@ void Board::display() const {
 }
 
 void Board::displayEnemyBoard() const {
+    // Выводим шапку
+    std::cout << "[ ]|0|1|2|3|4|5|6|7|8|9|" << std::endl;
+
     for (int i = 0; i < BOARD_SIZE; i++) {
+        std::cout << "[" << i << "]|";  // Выводим номер строки
         for (int j = 0; j < BOARD_SIZE; j++) {
-            if (grid[i][j] == 'X' || grid[i][j] == '.') {
-                std::cout << grid[i][j] << ' ';
+            if (grid[i][j] == 'O') {
+                std::cout << ' ' << '|';  // Скрываем корабли противника
             }
             else {
-                std::cout << ' ' << ' ';
+                std::cout << grid[i][j] << '|';  // Показываем только попадания и промахи
             }
         }
         std::cout << std::endl;
@@ -194,4 +167,8 @@ void Board::markSurroundingAsMiss(const Ship& ship) {
             }
         }
     }
+}
+
+bool Board::isCellShot(int x, int y) const {
+    return grid[y][x] == '.' || grid[y][x] == 'X' || grid[y][x] == '*';
 }

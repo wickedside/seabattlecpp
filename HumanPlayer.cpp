@@ -11,10 +11,15 @@ HumanPlayer::~HumanPlayer() {
 
 std::pair<int, int> HumanPlayer::chooseShootCoordinate() {
     int x, y;
-    std::cout << "Введите координату X для выстрела (0-9): ";
-    std::cin >> x;
-    std::cout << "Введите координату Y для выстрела (0-9): ";
-    std::cin >> y;
+    do {
+        std::cout << "Введите координату X для выстрела (0-9): ";
+        std::cin >> x;
+        std::cout << "Введите координату Y для выстрела (0-9): ";
+        std::cin >> y;
+        if (opponentBoard.isCellShot(x, y)) {
+            std::cout << "Вы уже стреляли в эти координаты. Попробуйте еще раз.\n";
+        }
+    } while (opponentBoard.isCellShot(x, y));
 
     return std::make_pair(x, y);
 }

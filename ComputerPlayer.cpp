@@ -6,6 +6,10 @@ ComputerPlayer::ComputerPlayer() {}
 
 ComputerPlayer::~ComputerPlayer() {}
 
+void ComputerPlayer::setShootingMode(Mode mode) {
+    shootingMode = mode;
+}
+
 std::pair<int, int> ComputerPlayer::chooseShootCoordinate() {
     if (shootingMode == Mode::INTELLIGENT) {
         if (!shipDirectionDetermined && !intelligentTargets.empty()) {
@@ -39,8 +43,11 @@ std::pair<int, int> ComputerPlayer::chooseShootCoordinate() {
     }
 
     // ≈сли мы здесь, значит у нас случайный выстрел или нам не удалось определить интеллектуальную цель
-    int x = rand() % 10;
-    int y = rand() % 10;
+    int x, y;
+    do {
+        x = rand() % 10;
+        y = rand() % 10;
+    } while (opponentBoard.isCellShot(x, y));
 
     return std::make_pair(x, y);
 }
@@ -51,7 +58,8 @@ void ComputerPlayer::placeShips() {
 }
 
 void ComputerPlayer::generateRandomShips() {
-    srand(time(0)); // »нициализируем генератор случайных чисел
+    static int seedIncrementer = 0;
+    srand(time(0) + seedIncrementer++); // ”величиваем сид, чтобы у каждого компьютера было уникальное размещение
 
     // ћассив возможных направлений корабл€
     const char directions[] = { 'h', 'v' };

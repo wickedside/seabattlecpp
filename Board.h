@@ -26,4 +26,5 @@ public:
     bool canPlaceShip(int x, int y, char direction, int size) const;
     void placeShip(int x, int y, char direction, int size);
     void markSurroundingAsMiss(const Ship& ship);
+    bool isCellShot(int x, int y) const;
 };

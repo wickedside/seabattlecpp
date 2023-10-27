@@ -13,9 +13,9 @@ public:
     void placeShips() override;
     std::string getPlayerType() const override { return "Компьютер"; }
 
-private:
     enum class Mode { RANDOM, INTELLIGENT };
-
+    void setShootingMode(Mode mode);
+private:
     Mode shootingMode = Mode::RANDOM;
     std::vector<std::pair<int, int>> intelligentTargets; // возможные цели в интеллектуальном режиме
 

@@ -1,31 +1,55 @@
 #include "Game.h"
 #include <iostream>
 
-Game::Game() : human(), computer() {
-    // Пусть игрок начинает первым
-    currentPlayer = &human;
-    opponent = &computer;
+ComputerPlayer::Mode convertToComputerMode(ShootingMode mode) {
+    switch (mode) {
+    case ShootingMode::RANDOM: return ComputerPlayer::Mode::RANDOM;
+    case ShootingMode::INTELLIGENT: return ComputerPlayer::Mode::INTELLIGENT;
+    default: return ComputerPlayer::Mode::RANDOM;
+    }
+}
+
+Game::Game() : human(), computer1(), computer2() {
+    gameMode = GameMode::HUMAN_VS_COMPUTER;
+    placementMode = PlacementMode::MANUAL;
+    shootingMode = ShootingMode::RANDOM;
 }
 
 void Game::start() {
     std::cout << "Игра началась!" << std::endl;
 
-    human.placeShips();
-    computer.placeShips();
+    if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
+        currentPlayer = &human;
+        opponent = &computer1;
+        if (placementMode == PlacementMode::MANUAL) {
+            human.placeShips();
+        }
+        else {
+            human.placeShips();
+        }
+        computer1.placeShips();
+        humanVsComputerLoop();
+    }
+    else {
+        currentPlayer = &computer1;
+        opponent = &computer2;
+        computer1.placeShips();
+        computer2.placeShips();
+        computerVsComputerLoop();
+    }
 
-    while (!human.allShipsSunk() && !computer.allShipsSunk()) {
+    announceWinner();
+}
+
+void Game::humanVsComputerLoop() {
+    while (!human.allShipsSunk() && !computer1.allShipsSunk()) {
         std::cout << "Ход " << (currentPlayer == &human ? "игрока" : "компьютера") << std::endl;
 
         if (currentPlayer == &human) {
             std::cout << "Ваша доска:" << std::endl;
             human.getOwnBoard().display();
             std::cout << "\nДоска компьютера:" << std::endl;
-            //human.getOpponentBoard().displayEnemyBoard();
-        }
-        else {
-            // Это не обязательно, но если вы хотите отобразить доску компьютера (для отладки, например):
-            std::cout << "Доска компьютера:" << std::endl;
-            computer.getOwnBoard().display();
+            computer1.getOwnBoard().displayEnemyBoard();
         }
 
         auto coordinate = currentPlayer->chooseShootCoordinate();
@@ -43,29 +67,72 @@ void Game::start() {
             std::cout << "Промах!" << std::endl;
             break;
         }
-        // Обработайте результат выстрела (промах, попадание, уничтожение корабля и т.д.)
-        // Здесь можно добавить логику для отображения результата выстрела, например, вывод сообщений о попадании или промахе.
 
         switchPlayers();
     }
+}
 
-    announceWinner();
+void Game::computerVsComputerLoop() {
+    while (!computer1.allShipsSunk() && !computer2.allShipsSunk()) {
+        std::cout << "Ход компьютера" << (currentPlayer == &computer1 ? " 1" : " 2") << std::endl;
+
+        std::cout << "Доска компьютера 1:" << std::endl;
+        computer1.getOwnBoard().display();
+        std::cout << "\nДоска компьютера 2:" << std::endl;
+        computer2.getOwnBoard().display();
+
+        auto coordinate = currentPlayer->chooseShootCoordinate();
+        ShipStatus status = currentPlayer->shootAtPlayer(*opponent, coordinate);
+
+        switch (status) {
+        case ShipStatus::HIT:
+            std::cout << "Попадание!" << std::endl;
+            break;
+        case ShipStatus::SUNK:
+            std::cout << "Корабль уничтожен!" << std::endl;
+            break;
+        case ShipStatus::ALIVE:
+        default:
+            std::cout << "Промах!" << std::endl;
+            break;
+        }
+
+        switchPlayers();
+    }
 }
 
 void Game::switchPlayers() {
-    if (currentPlayer == &human) {
-        currentPlayer = &computer;
-        opponent = &human;
+    if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
+        if (currentPlayer == &human) {
+            currentPlayer = &computer1;
+            opponent = &human;
+        }
+        else {
+            currentPlayer = &human;
+            opponent = &computer1;
+        }
     }
     else {
-        currentPlayer = &human;
-        opponent = &computer;
+        if (currentPlayer == &computer1) {
+            currentPlayer = &computer2;
+            opponent = &computer1;
+        }
+        else {
+            currentPlayer = &computer1;
+            opponent = &computer2;
+        }
     }
 }
 
 void Game::announceWinner() {
     if (human.allShipsSunk()) {
         std::cout << "Компьютер победил!" << std::endl;
+    }
+    else if (computer1.allShipsSunk()) {
+        std::cout << "Компьютер 2 победил!" << std::endl;
+    }
+    else if (computer2.allShipsSunk()) {
+        std::cout << "Компьютер 1 победил!" << std::endl;
     }
     else {
         std::cout << "Вы победили!" << std::endl;

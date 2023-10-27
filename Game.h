@@ -1,15 +1,34 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "HumanPlayer.h"
 #include "ComputerPlayer.h"
 
+enum class GameMode {
+    HUMAN_VS_COMPUTER,
+    COMPUTER_VS_COMPUTER
+};
+
+enum class PlacementMode {
+    MANUAL,
+    AUTO
+};
+
+enum class ShootingMode {
+    RANDOM,
+    INTELLIGENT
+};
+
 class Game {
 private:
     HumanPlayer human;
-    ComputerPlayer computer;
+    ComputerPlayer computer1;
+    ComputerPlayer computer2;
     Player* currentPlayer;
     Player* opponent;
+
+    GameMode gameMode;
+    PlacementMode placementMode;
+    ShootingMode shootingMode;
 
     void switchPlayers();
     void announceWinner();
@@ -17,6 +36,10 @@ private:
 public:
     Game();
     void start();
-};
 
-#endif // GAME_H
+    void setGameMode(GameMode mode) { gameMode = mode; }
+    void setPlacementMode(PlacementMode mode) { placementMode = mode; }
+    void setShootingMode(ShootingMode mode) { shootingMode = mode; }
+    void humanVsComputerLoop();
+    void computerVsComputerLoop();
+};
