@@ -11,37 +11,26 @@ void ComputerPlayer::setShootingMode(Mode mode) {
 
 std::pair<int, int> ComputerPlayer::chooseShootCoordinate() {
     if (shootingMode == Mode::INTELLIGENT) {
-        if (!shipDirectionDetermined && !intelligentTargets.empty()) {
-            auto target = intelligentTargets.back();
-            intelligentTargets.pop_back();
-            return target;
+        if (lastHit.first == -1 && lastHit.second == -1) {
+            // Стреляем рандомно, если нет последнего попадания
+            return randomShoot();
         }
-
-        if (shipDirection == 'h') {
-            // Попробуйте выстрелить влево или вправо от последнего попадания
-            for (int dx = -1; dx <= 1; dx += 2) {
-                int x = lastHit.first + dx;
-                int y = lastHit.second;
-
-                if (x >= 0 && x < 10) {
-                    return std::make_pair(x, y);
-                }
-            }
+        if (!shipDirectionDetermined) {
+            // Если направление корабля не определено
+            return shootAroundLastHit();
         }
-        else if (shipDirection == 'v') {
-            // Попробуйте выстрелить вверх или вниз от последнего попадания
-            for (int dy = -1; dy <= 1; dy += 2) {
-                int x = lastHit.first;
-                int y = lastHit.second + dy;
-
-                if (y >= 0 && y < 10) {
-                    return std::make_pair(x, y);
-                }
-            }
+        else {
+            // Если направление корабля известно
+            return shootInDirection();
         }
     }
+    else {
+        // Случайный режим стрельбы
+        return randomShoot();
+    }
+}
 
-    // Если мы здесь, значит у нас случайный выстрел или нам не удалось определить интеллектуальную цель
+std::pair<int, int> ComputerPlayer::randomShoot() {
     int x, y;
     do {
         x = rand() % 10;
@@ -49,6 +38,46 @@ std::pair<int, int> ComputerPlayer::chooseShootCoordinate() {
     } while (opponentBoard.isCellShot(x, y));
 
     return std::make_pair(x, y);
+}
+
+std::pair<int, int> ComputerPlayer::shootAroundLastHit() {
+    const int dx[] = { -1,  0,  1,  0 };
+    const int dy[] = { 0, -1,  0,  1 };
+
+    for (int i = 0; i < 4; ++i) {
+        int newX = lastHit.first + dx[i];
+        int newY = lastHit.second + dy[i];
+
+        if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10 && !opponentBoard.isCellShot(newX, newY)) {
+            return std::make_pair(newX, newY);
+        }
+    }
+
+    // Если все соседние клетки были уже атакованы, вернуться к случайной стрельбе
+    return randomShoot();
+}
+
+std::pair<int, int> ComputerPlayer::shootInDirection() {
+    int dx = 0, dy = 0;
+
+    if (lastHitDirection == 'h') {
+        dx = (consecutiveHits % 2 == 0) ? 1 : -1;
+    }
+    else if (lastHitDirection == 'v') {
+        dy = (consecutiveHits % 2 == 0) ? 1 : -1;
+    }
+
+    int newX = lastHit.first + dx;
+    int newY = lastHit.second + dy;
+
+    // Если новые координаты в пределах доски и клетка не была атакована, вернуть их
+    if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10 && !opponentBoard.isCellShot(newX, newY)) {
+        return std::make_pair(newX, newY);
+    }
+    else {
+        // Иначе, вернуться к случайной стрельбе
+        return randomShoot();
+    }
 }
 
 void ComputerPlayer::placeShips() {

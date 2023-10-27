@@ -32,12 +32,16 @@ void Game::start() {
             std::cout << "Доска игрока:" << std::endl;
             human.getOwnBoard().display();
         }
-
-        std::cout << "Расставляем корабли компьютера автоматически" << std::endl;
+        
+        // std::cout << "Расставляем корабли компьютера автоматически" << std::endl;
         computer1.placeShips();
+
+        // DEBUG
+        /*
         std::cout << "Корабли компьютера расставлены" << std::endl;
         std::cout << "Доска компьютера:" << std::endl;
         computer1.getOwnBoard().display();
+ 
         if (human.allShipsSunk()) {
             std::cout << "Все корабли игрока потоплены до начала игры!" << std::endl;
             return;
@@ -46,7 +50,7 @@ void Game::start() {
         if (computer1.allShipsSunk()) {
             std::cout << "Все корабли компьютера потоплены до начала игры!" << std::endl;
             return;
-        }
+        }*/
 
         humanVsComputerLoop();
     }
@@ -155,6 +159,7 @@ void Game::switchPlayers() {
 }
 
 void Game::announceWinner() {
+    char startAgain;
     if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
         if (human.allShipsSunk()) {
             std::cout << "Компьютер победил!" << std::endl;
@@ -171,4 +176,61 @@ void Game::announceWinner() {
             std::cout << "Компьютер 1 победил!" << std::endl;
         }
     }
+    /*
+    std::cout << "Начать игру заново? (y/n): ";
+    std::cin >> startAgain;
+
+    if (startAgain == 'y') {
+        start();
+    }
+    else exit(0);
+    */
 }
+
+/*void Game::handleStopMenu() {
+    bool exitMenu = false;
+    do {
+        system("cls");
+        std::cout << "1. Продолжить" << std::endl;
+        std::cout << "2. Начать игру заново" << std::endl;
+        std::cout << "3. Выйти в главное меню" << std::endl;
+        std::cout << "4. Выйти из игры" << std::endl;
+
+        char choice = getCharWithoutEnter();
+        switch (choice) {
+        case '1':
+            exitMenu = true;
+            break;
+        case '2':
+            start();
+            exitMenu = true;
+            break;
+        case '3':
+            handleMenuSelection(*this);
+            exitMenu = true;
+            break;
+        case '4':
+            exit(0);
+        default:
+            std::cout << "Неверный выбор. Попробуйте еще раз." << std::endl;
+            break;
+        }
+    } while (!exitMenu);
+}
+
+void Game::handlePause() {
+    system("cls");
+    std::cout << "Игра на паузе. Нажмите 'p', чтобы продолжить..." << std::endl;
+    while (!isKeyPressed('p')) {
+        // Ожидание...
+    }
+}
+
+void Game::check() {
+    if (isKeyPressed(27)) { // 27 - код клавиши ESC
+        handleStopMenu();
+    }
+    else if (isKeyPressed('p')) {
+        handlePause();
+    }
+}*/

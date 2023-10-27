@@ -19,7 +19,7 @@ bool Board::addShip(const Ship& ship) {
 
     ships.push_back(ship);
 
-    // Отладочная печать
+    // Отладочная печать DEBUG
     std::cout << "Added ship at: (" << ship.getStartCoordinate().first << ", " << ship.getStartCoordinate().second << ") with length: " << ship.getLength() << std::endl;
 
     int curX = x; // новая переменная для индекса столбца
