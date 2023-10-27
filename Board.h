@@ -27,4 +27,5 @@ public:
     void placeShip(int x, int y, char direction, int size);
     void markSurroundingAsMiss(const Ship& ship);
     bool isCellShot(int x, int y) const;
+    void setCell(const std::pair<int, int>& coordinate, char value);
 };

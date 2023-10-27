@@ -58,7 +58,7 @@ void ComputerPlayer::placeShips() {
 }
 
 void ComputerPlayer::generateRandomShips() {
-    static int seedIncrementer = 0;
+    static int seedIncrementer = 37;
     srand(time(0) + seedIncrementer++); // Увеличиваем сид, чтобы у каждого компьютера было уникальное размещение
 
     // Массив возможных направлений корабля

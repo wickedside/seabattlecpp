@@ -14,3 +14,7 @@ bool Player::allShipsSunk() const {
     }
     return true;
 }
+
+void Player::updateOpponentBoard(const Board& board) {
+    opponentBoard = board;
+}

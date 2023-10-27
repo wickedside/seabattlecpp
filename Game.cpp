@@ -54,6 +54,12 @@ void Game::humanVsComputerLoop() {
 
         auto coordinate = currentPlayer->chooseShootCoordinate();
         ShipStatus status = currentPlayer->shootAtPlayer(*opponent, coordinate);
+        if (currentPlayer == &human) {
+            human.updateOpponentBoard(computer1.getOwnBoard());
+        }
+        else {
+            computer1.updateOpponentBoard(human.getOwnBoard());
+        }
 
         switch (status) {
         case ShipStatus::HIT:
@@ -82,6 +88,12 @@ void Game::computerVsComputerLoop() {
 
         auto coordinate = currentPlayer->chooseShootCoordinate();
         ShipStatus status = currentPlayer->shootAtPlayer(*opponent, coordinate);
+        if (currentPlayer == &computer1) {
+            computer1.updateOpponentBoard(computer2.getOwnBoard());
+        }
+        else {
+            computer2.updateOpponentBoard(computer1.getOwnBoard());
+        }
 
         switch (status) {
         case ShipStatus::HIT:

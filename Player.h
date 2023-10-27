@@ -22,4 +22,5 @@ public:
 
     ShipStatus shootAtPlayer(Player& opponent, const std::pair<int, int>& coordinate);
     bool allShipsSunk() const;
+    void updateOpponentBoard(const Board& board);
 };

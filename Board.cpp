@@ -172,3 +172,7 @@ void Board::markSurroundingAsMiss(const Ship& ship) {
 bool Board::isCellShot(int x, int y) const {
     return grid[y][x] == '.' || grid[y][x] == 'X' || grid[y][x] == '*';
 }
+
+void Board::setCell(const std::pair<int, int>& coordinate, char value) {
+    grid[coordinate.second][coordinate.first] = value;
+}
