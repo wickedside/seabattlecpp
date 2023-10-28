@@ -85,14 +85,13 @@ std::pair<int, int> ComputerPlayer::shootInDirection() {
         return std::make_pair(newX, newY);
     }
     else {
-        // ≈сли выстрел в заданном направлении невозможен и еще не пробовали стрел€ть в обратном направлении
         if (!reversedDirection) {
             reversedDirection = true;
-            return shootInDirection();
+            return shootInDirection(); // ѕробуем стрел€ть в обратное направление
         }
-        // ≈сли оба направлени€ невозможны, вернутьс€ к случайной стрельбе
         else {
             reversedDirection = false; // сбросить флаг
+            resetShootingStrategy();   // ≈сли стрел€ли в обратное направление и промахнулись, сбросим стратегию
             return randomShoot();
         }
     }
@@ -153,15 +152,11 @@ void ComputerPlayer::registerHit(int x, int y) {
 }
 
 void ComputerPlayer::registerMiss() {
-    if (shipDirectionDetermined) {
-        // ≈сли направление корабл€ было определено и мы еще не стрел€ли в обратное направление
-        if (!reversedDirection) {
-            reversedDirection = true;
-        }
-        else {
-            // ≈сли мы уже стрел€ли в обратное направление и промахнулись, сбросить всю стратегию стрельбы
-            resetShootingStrategy();
-        }
+    if (shipDirectionDetermined && !reversedDirection) {
+        reversedDirection = true; // ѕопробуем стрел€ть в обратное направление на следующем ходу
+    }
+    else if (reversedDirection) {
+        resetShootingStrategy(); // ≈сли мы уже пробовали обратное направление и промахнулись, сбросим стратегию
     }
 }
 
