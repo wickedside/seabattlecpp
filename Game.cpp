@@ -22,6 +22,8 @@ void Game::start() {
         currentPlayer = &human;
         opponent = &computer1;
 
+        computer1.setShootingMode(convertToComputerMode(shootingMode));
+
         if (placementMode == PlacementMode::MANUAL) {
             human.placeShips();
         }
@@ -78,6 +80,15 @@ void Game::humanVsComputerLoop() {
 
         auto coordinate = currentPlayer->chooseShootCoordinate();
         ShipStatus status = currentPlayer->shootAtPlayer(*opponent, coordinate);
+        if (currentPlayer == &computer1) {  // Проверяем, что текущий игрок - компьютер
+            if (status == ShipStatus::HIT) {
+                computer1.registerHit(coordinate.first, coordinate.second);
+            }
+            if (status == ShipStatus::SUNK && currentPlayer == &computer1) {
+                computer1.registerMiss();
+                computer1.resetInitialHit(); // добавьте этот метод для сброса initialHit
+            }
+        }
         if (currentPlayer == &human) {
             human.updateOpponentBoard(computer1.getOwnBoard());
         }
