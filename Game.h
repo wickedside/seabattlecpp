@@ -42,7 +42,8 @@ public:
     void setShootingMode(ShootingMode mode) { shootingMode = mode; }
     void humanVsComputerLoop();
     void computerVsComputerLoop();
-    //void handleStopMenu();
-    //void handlePause();
-    //void check();
+    void stopGame();
+    void pauseGame();
+    void checkForPauseOrStop();
+    void returnToMainMenu();
 };

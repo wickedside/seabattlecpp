@@ -145,6 +145,7 @@
     <ClCompile Include="ComputerPlayer.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HumanPlayer.cpp" />
+    <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="seabattle.cpp" />
     <ClCompile Include="Ship.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="ComputerPlayer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HumanPlayer.h" />
+    <ClInclude Include="mainmenu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Ship.h" />
   </ItemGroup>

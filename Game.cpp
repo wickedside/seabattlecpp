@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <iostream>
+#include "mainmenu.h"
 
 ComputerPlayer::Mode convertToComputerMode(ShootingMode mode) {
     switch (mode) {
@@ -16,7 +17,8 @@ Game::Game() : human(), computer1(), computer2() {
 }
 
 void Game::start() {
-   std::cout << R"(
+    checkForPauseOrStop();
+std::cout << R"(
 
   /$$$$$$  /$$$$$$$$ /$$$$$$  /$$$$$$$  /$$$$$$$$
  /$$__  $$|__  $$__//$$__  $$| $$__  $$|__  $$__/
@@ -28,7 +30,6 @@ void Game::start() {
  \______/    |__/  |__/  |__/|__/  |__/   |__/   
                                                                                                                                      
 )" << std::endl;
-
     if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
         currentPlayer = &human;
         opponent = &computer1;
@@ -62,7 +63,9 @@ void Game::start() {
 }
 
 void Game::humanVsComputerLoop() {
+    checkForPauseOrStop();
     while (!human.allShipsSunk() && !computer1.allShipsSunk()) {
+        checkForPauseOrStop();
         std::cout << "\n -> Ход " << (currentPlayer == &human ? "игрока\n" : "компьютера\n") << std::endl;
 
         if (currentPlayer == &human) {
@@ -107,7 +110,9 @@ void Game::humanVsComputerLoop() {
 }
 
 void Game::computerVsComputerLoop() {
+    checkForPauseOrStop();
     while (!computer1.allShipsSunk() && !computer2.allShipsSunk()) {
+        checkForPauseOrStop();
         std::cout << "\n -> Ход компьютера" << (currentPlayer == &computer1 ? " 1" : " 2") << std::endl;
 
         std::cout << "Доска компьютера 1:" << std::endl;
@@ -216,61 +221,71 @@ void Game::announceWinner() {
             computer2.getOwnBoard().display();
         }
     }
-    /*
-    std::cout << "Начать игру заново? (y/n): ";
-    std::cin >> startAgain;
-
-    if (startAgain == 'y') {
-        start();
-    }
-    */
     exit(0);
 }
 
-/*void Game::handleStopMenu() {
-    bool exitMenu = false;
+char getCharWithoutEnter() {
+    return _getch();
+}
+
+void Game::checkForPauseOrStop() {
+    if (_kbhit()) { // Проверка, нажата ли клавиша
+        char keyPressed = getCharWithoutEnter();
+        if (keyPressed == 'p') {
+            pauseGame();
+        }
+        else if (keyPressed == 27) { // ESC key
+            stopGame();
+        }
+    }
+}
+
+void Game::pauseGame() {
+    // Очистить экран и вывести сообщение о паузе
+    system("cls"); // Используйте "clear" если работаете на Unix-подобной системе
+    std::cout << "Игра на паузе. Нажмите 'p', чтобы продолжить..." << std::endl;
+
+    // Ожидание пока не будет нажата клавиша 'p'
+    while (getCharWithoutEnter() != 'p') {
+        // Здесь код может выполнять другие функции или просто ожидать
+    }
+    // Возобновление игры, возможно, с перерисовкой элементов игры
+    // Вам может потребоваться повторно отобразить доски, статус и т.д.
+}
+
+void Game::stopGame() {
+    char choice;
     do {
-        system("cls");
+        system("cls"); // Очистить экран
         std::cout << "1. Продолжить" << std::endl;
         std::cout << "2. Начать игру заново" << std::endl;
         std::cout << "3. Выйти в главное меню" << std::endl;
         std::cout << "4. Выйти из игры" << std::endl;
 
-        char choice = getCharWithoutEnter();
+        choice = getCharWithoutEnter();
+
         switch (choice) {
-        case '1':
-            exitMenu = true;
-            break;
-        case '2':
+        case '1': // Продолжение игры
+            return;
+        case '2': // Перезапуск игры
             start();
-            exitMenu = true;
-            break;
-        case '3':
-            handleMenuSelection(*this);
-            exitMenu = true;
-            break;
-        case '4':
+            return;
+        case '3': // Возврат в главное меню
+            returnToMainMenu();
+            return;
+        case '4': // Выход из игры
             exit(0);
-        default:
+            return;
+        default: // Недопустимый ввод, повторите запрос выбора
             std::cout << "Неверный выбор. Попробуйте еще раз." << std::endl;
             break;
         }
-    } while (!exitMenu);
+    } while (true); // Оставайтесь в меню, пока не будет сделан допустимый выбор
 }
 
-void Game::handlePause() {
-    system("cls");
-    std::cout << "Игра на паузе. Нажмите 'p', чтобы продолжить..." << std::endl;
-    while (!isKeyPressed('p')) {
-        // Ожидание...
-    }
+void Game::returnToMainMenu() {
+    // Сохранение состояния текущей игры, если необходимо
+    // Отображение главного меню
+    MainMenu returnMenu;
+    returnMenu.handleMenuSelection(*this); // предполагается, что handleMenuSelection - это функция, которая отображает и обрабатывает главное меню
 }
-
-void Game::check() {
-    if (isKeyPressed(27)) { // 27 - код клавиши ESC
-        handleStopMenu();
-    }
-    else if (isKeyPressed('p')) {
-        handlePause();
-    }
-}*/
