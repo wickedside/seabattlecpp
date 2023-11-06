@@ -42,7 +42,7 @@ public:
     void setShootingMode(ShootingMode mode) { shootingMode = mode; }
     void humanVsComputerLoop();
     void computerVsComputerLoop();
-    void stopGame();
+    void stopGame(bool clear);
     void pauseGame();
     void checkForPauseOrStop();
     void returnToMainMenu();

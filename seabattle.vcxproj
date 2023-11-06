@@ -145,7 +145,6 @@
     <ClCompile Include="ComputerPlayer.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HumanPlayer.cpp" />
-    <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="seabattle.cpp" />
     <ClCompile Include="Ship.cpp" />

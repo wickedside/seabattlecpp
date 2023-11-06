@@ -110,10 +110,27 @@ void Game::humanVsComputerLoop() {
 }
 
 void Game::computerVsComputerLoop() {
-    checkForPauseOrStop();
     while (!computer1.allShipsSunk() && !computer2.allShipsSunk()) {
-        checkForPauseOrStop();
         std::cout << "\n -> Ход компьютера" << (currentPlayer == &computer1 ? " 1" : " 2") << std::endl;
+        std::cout << "Нажмите Enter для следующего хода." << std::endl;
+
+        bool enterPressed = false;
+        while (!enterPressed) {
+            if (_kbhit()) { // Если нажата клавиша
+                char keyPressed = _getch(); // Получить код клавиши
+                if (keyPressed == 13) { // Код клавиши Enter
+                    enterPressed = true;
+                }
+                else if (keyPressed == 'p' || keyPressed == 'P') { // Клавиша 'p' или 'P'
+                    pauseGame();
+                    std::cout << "Нажмите Enter для следующего хода." << std::endl;
+                }
+                else if (keyPressed == 27) { // Клавиша ESC
+                    bool clear = true;
+                    stopGame(clear);
+                }
+            }
+        }
 
         std::cout << "Доска компьютера 1:" << std::endl;
         computer1.getOwnBoard().display();
@@ -221,7 +238,8 @@ void Game::announceWinner() {
             computer2.getOwnBoard().display();
         }
     }
-    exit(0);
+    bool clear = false;
+    stopGame(clear);
 }
 
 char getCharWithoutEnter() {
@@ -234,8 +252,12 @@ void Game::checkForPauseOrStop() {
         if (keyPressed == 'p') {
             pauseGame();
         }
+        else if (keyPressed == 10 || keyPressed == 13) {
+            //nextTurn();
+        }
         else if (keyPressed == 27) { // ESC key
-            stopGame();
+            bool clear = true;
+            stopGame(clear);
         }
     }
 }
@@ -243,6 +265,18 @@ void Game::checkForPauseOrStop() {
 void Game::pauseGame() {
     // Очистить экран и вывести сообщение о паузе
     system("cls"); // Используйте "clear" если работаете на Unix-подобной системе
+    std::cout << R"(
+
+ /$$$$$$$                                        
+| $$__  $$                                       
+| $$  \ $$ /$$$$$$  /$$   /$$  /$$$$$$$  /$$$$$$ 
+| $$$$$$$/|____  $$| $$  | $$ /$$_____/ /$$__  $$
+| $$____/  /$$$$$$$| $$  | $$|  $$$$$$ | $$$$$$$$
+| $$      /$$__  $$| $$  | $$ \____  $$| $$_____/
+| $$     |  $$$$$$$|  $$$$$$/ /$$$$$$$/|  $$$$$$$
+|__/      \_______/ \______/ |_______/  \_______/
+                                                                                                                                 
+)" << std::endl;
     std::cout << "Игра на паузе. Нажмите 'p', чтобы продолжить..." << std::endl;
 
     // Ожидание пока не будет нажата клавиша 'p'
@@ -253,27 +287,39 @@ void Game::pauseGame() {
     // Вам может потребоваться повторно отобразить доски, статус и т.д.
 }
 
-void Game::stopGame() {
+void Game::stopGame(bool clear) {
     char choice;
     do {
-        system("cls"); // Очистить экран
+        if (clear == true) {
+            system("cls"); // Очистить экран
+        }
+        std::cout << R"(
+
+ /$$      /$$                              
+| $$$    /$$$                              
+| $$$$  /$$$$  /$$$$$$  /$$$$$$$  /$$   /$$
+| $$ $$/$$ $$ /$$__  $$| $$__  $$| $$  | $$
+| $$  $$$| $$| $$$$$$$$| $$  \ $$| $$  | $$
+| $$\  $ | $$| $$_____/| $$  | $$| $$  | $$
+| $$ \/  | $$|  $$$$$$$| $$  | $$|  $$$$$$/
+|__/     |__/ \_______/|__/  |__/ \______/ 
+                                                                            
+)" << std::endl;
         std::cout << "1. Продолжить" << std::endl;
-        std::cout << "2. Начать игру заново" << std::endl;
-        std::cout << "3. Выйти в главное меню" << std::endl;
-        std::cout << "4. Выйти из игры" << std::endl;
+        std::cout << "2. Выйти в главное меню" << std::endl;
+        std::cout << "3. Выйти из игры" << std::endl;
 
         choice = getCharWithoutEnter();
 
         switch (choice) {
         case '1': // Продолжение игры
+            system("cls"); // Очистить экран
+            std::cout << "Нажмите Enter, чтобы продолжить..." << std::endl;
             return;
-        case '2': // Перезапуск игры
-            start();
-            return;
-        case '3': // Возврат в главное меню
+        case '2': // Выход в главное меню
             returnToMainMenu();
             return;
-        case '4': // Выход из игры
+        case '3': // Выход из игры
             exit(0);
             return;
         default: // Недопустимый ввод, повторите запрос выбора
@@ -286,6 +332,7 @@ void Game::stopGame() {
 void Game::returnToMainMenu() {
     // Сохранение состояния текущей игры, если необходимо
     // Отображение главного меню
+    Game seaBattle;
     MainMenu returnMenu;
-    returnMenu.handleMenuSelection(*this); // предполагается, что handleMenuSelection - это функция, которая отображает и обрабатывает главное меню
+    returnMenu.handleMenuSelection(seaBattle); // предполагается, что handleMenuSelection - это функция, которая отображает и обрабатывает главное меню
 }

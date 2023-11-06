@@ -28,6 +28,8 @@ public:
         std::cout << "3. Выбрать расстановку кораблей." << std::endl;
         std::cout << "4. Выбрать режим стрельбы для компьютера." << std::endl;
         std::cout << "5. Выйти из игры." << std::endl;
+        std::cout << "\n\n\n\n";
+        std::cout << "ESC - показать меню в игре.               P - пауза.\n";
     }
 
     char getCharWith0utEnter() {

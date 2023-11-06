@@ -8,9 +8,3 @@ int main() {
     menu.handleMenuSelection(seaBattle);
     return 0;
 }
-
-/*
-bool isKeyPressed(int key) {
-    return _kbhit() && _getch() == key;
-}
-*/

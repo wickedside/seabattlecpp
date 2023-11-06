@@ -3,6 +3,9 @@
 #include "Player.h"
 #include <iostream>
 #include <string>
+#include <conio.h>
+#include <cctype> // для функции tolower
+#include <limits> // для std::numeric_limit
 
 class HumanPlayer : public Player {
 public:
