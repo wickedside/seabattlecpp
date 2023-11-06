@@ -20,7 +20,7 @@ bool Board::addShip(const Ship& ship) {
     ships.push_back(ship);
 
     // Отладочная печать DEBUG
-    std::cout << "Added ship at: (" << ship.getStartCoordinate().first << ", " << ship.getStartCoordinate().second << ") with length: " << ship.getLength() << std::endl;
+    //std::cout << "Added ship at: (" << ship.getStartCoordinate().first << ", " << ship.getStartCoordinate().second << ") with length: " << ship.getLength() << std::endl;
 
     int curX = x; // новая переменная для индекса столбца
     int curY = y; // новая переменная для индекса строки
@@ -54,7 +54,7 @@ ShipStatus Board::shootAt(const std::pair<int, int>& coordinate) {
         if (ship.isAt(coordinate)) {
             if (ship.hit(coordinate)) {
                 grid[y][x] = 'X';  // Используем y перед x
-                std::cout << "Hit ship at: (" << ship.getStartCoordinate().first << ", " << ship.getStartCoordinate().second << ") with length: " << ship.getLength() << std::endl;
+                //std::cout << "Hit ship at: (" << ship.getStartCoordinate().first << ", " << ship.getStartCoordinate().second << ") with length: " << ship.getLength() << std::endl;
                 if (ship.getStatus() == ShipStatus::SUNK) {
                     markSurroundingAsMiss(ship);
                     return ShipStatus::SUNK;

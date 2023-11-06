@@ -16,7 +16,18 @@ Game::Game() : human(), computer1(), computer2() {
 }
 
 void Game::start() {
-    std::cout << "Игра началась!" << std::endl;
+   std::cout << R"(
+
+  /$$$$$$  /$$$$$$$$ /$$$$$$  /$$$$$$$  /$$$$$$$$
+ /$$__  $$|__  $$__//$$__  $$| $$__  $$|__  $$__/
+| $$  \__/   | $$  | $$  \ $$| $$  \ $$   | $$   
+|  $$$$$$    | $$  | $$$$$$$$| $$$$$$$/   | $$   
+ \____  $$   | $$  | $$__  $$| $$__  $$   | $$   
+ /$$  \ $$   | $$  | $$  | $$| $$  \ $$   | $$   
+|  $$$$$$/   | $$  | $$  | $$| $$  | $$   | $$   
+ \______/    |__/  |__/  |__/|__/  |__/   |__/   
+                                                                                                                                     
+)" << std::endl;
 
     if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
         currentPlayer = &human;
@@ -28,48 +39,31 @@ void Game::start() {
             human.placeShips();
         }
         else {
-            std::cout << "Расставляем корабли игрока автоматически" << std::endl;
+            std::cout << "[Расставляем корабли игрока автоматически]" << std::endl;
             human.autoPlaceShips(); // вызываем метод автоматической расстановки
-            std::cout << "Корабли игрока расставлены" << std::endl;
-            std::cout << "Доска игрока:" << std::endl;
-            human.getOwnBoard().display();
+            std::cout << "[Корабли игрока расставлены]" << std::endl;
+            //std::cout << "Доска игрока:" << std::endl;
+            //human.getOwnBoard().display();
         }
         
-        // std::cout << "Расставляем корабли компьютера автоматически" << std::endl;
         computer1.placeShips();
-
-        // DEBUG
-        /*
-        std::cout << "Корабли компьютера расставлены" << std::endl;
-        std::cout << "Доска компьютера:" << std::endl;
-        computer1.getOwnBoard().display();
- 
-        if (human.allShipsSunk()) {
-            std::cout << "Все корабли игрока потоплены до начала игры!" << std::endl;
-            return;
-        }
-
-        if (computer1.allShipsSunk()) {
-            std::cout << "Все корабли компьютера потоплены до начала игры!" << std::endl;
-            return;
-        }*/
-
         humanVsComputerLoop();
     }
     else {
         currentPlayer = &computer1;
         opponent = &computer2;
+        computer1.setShootingMode(convertToComputerMode(shootingMode));
+        computer2.setShootingMode(convertToComputerMode(shootingMode));
         computer1.placeShips();
         computer2.placeShips();
         computerVsComputerLoop();
     }
-
     announceWinner();
 }
 
 void Game::humanVsComputerLoop() {
     while (!human.allShipsSunk() && !computer1.allShipsSunk()) {
-        std::cout << "Ход " << (currentPlayer == &human ? "игрока" : "компьютера") << std::endl;
+        std::cout << "\n -> Ход " << (currentPlayer == &human ? "игрока\n" : "компьютера\n") << std::endl;
 
         if (currentPlayer == &human) {
             std::cout << "Ваша доска:" << std::endl;
@@ -84,9 +78,9 @@ void Game::humanVsComputerLoop() {
             if (status == ShipStatus::HIT) {
                 computer1.registerHit(coordinate.first, coordinate.second);
             }
-            if (status == ShipStatus::SUNK && currentPlayer == &computer1) {
-                computer1.registerMiss();
-                computer1.resetInitialHit(); // добавьте этот метод для сброса initialHit
+            else if (status == ShipStatus::SUNK) {
+                computer1.resetShootingStrategy(); // Сброс стратегии стрельбы после уничтожения корабля
+                std::cout << "\n[СБРОС СТРАТЕГИИ СТРЕЛЬБЫ ПОСЛЕ УНИЧТОЖЕНИЯ КОРАБЛЯ]\n" << std::endl;
             }
         }
         if (currentPlayer == &human) {
@@ -98,14 +92,14 @@ void Game::humanVsComputerLoop() {
 
         switch (status) {
         case ShipStatus::HIT:
-            std::cout << "Попадание!" << std::endl;
+            std::cout << "\n[ Попадание! ]\n" << std::endl;
             break;
         case ShipStatus::SUNK:
-            std::cout << "Корабль уничтожен!" << std::endl;
+            std::cout << "\n[ Корабль уничтожен! ]\n" << std::endl;
             break;
         case ShipStatus::ALIVE:
         default:
-            std::cout << "Промах!" << std::endl;
+            std::cout << "\n[ Промах! ]\n" << std::endl;
             switchPlayers();
             break;
         }
@@ -114,7 +108,7 @@ void Game::humanVsComputerLoop() {
 
 void Game::computerVsComputerLoop() {
     while (!computer1.allShipsSunk() && !computer2.allShipsSunk()) {
-        std::cout << "Ход компьютера" << (currentPlayer == &computer1 ? " 1" : " 2") << std::endl;
+        std::cout << "\n -> Ход компьютера" << (currentPlayer == &computer1 ? " 1" : " 2") << std::endl;
 
         std::cout << "Доска компьютера 1:" << std::endl;
         computer1.getOwnBoard().display();
@@ -123,6 +117,25 @@ void Game::computerVsComputerLoop() {
 
         auto coordinate = currentPlayer->chooseShootCoordinate();
         ShipStatus status = currentPlayer->shootAtPlayer(*opponent, coordinate);
+        if (currentPlayer == &computer1) {  // Проверяем, что текущий игрок - компьютер 1
+            if (status == ShipStatus::HIT) {
+                computer1.registerHit(coordinate.first, coordinate.second);
+            }
+            else if (status == ShipStatus::SUNK) {
+                computer1.resetShootingStrategy(); // Сброс стратегии стрельбы после уничтожения корабля
+                std::cout << "\n[СБРОС СТРАТЕГИИ СТРЕЛЬБЫ ПОСЛЕ УНИЧТОЖЕНИЯ КОРАБЛЯ]\n" << std::endl;
+            }
+        }
+        else {  // Проверяем, что текущий игрок - компьютер 2
+            if (status == ShipStatus::HIT) {
+                computer2.registerHit(coordinate.first, coordinate.second);
+            }
+            else if (status == ShipStatus::SUNK) {
+                computer2.resetShootingStrategy(); // Сброс стратегии стрельбы после уничтожения корабля
+                std::cout << "\n[СБРОС СТРАТЕГИИ СТРЕЛЬБЫ ПОСЛЕ УНИЧТОЖЕНИЯ КОРАБЛЯ]\n" << std::endl;
+            }
+        }
+        // Обновление доски оппонента
         if (currentPlayer == &computer1) {
             computer1.updateOpponentBoard(computer2.getOwnBoard());
         }
@@ -132,14 +145,14 @@ void Game::computerVsComputerLoop() {
 
         switch (status) {
         case ShipStatus::HIT:
-            std::cout << "Попадание!" << std::endl;
+            std::cout << "\n[ Попадание! ]\n" << std::endl;
             break;
         case ShipStatus::SUNK:
-            std::cout << "Корабль уничтожен!" << std::endl;
+            std::cout << "\n[ Корабль уничтожен! ]\n" << std::endl;
             break;
         case ShipStatus::ALIVE:
         default:
-            std::cout << "Промах!" << std::endl;
+            std::cout << "\n[ Промах! ]\n" << std::endl;
             switchPlayers();
             break;
         }
@@ -173,18 +186,34 @@ void Game::announceWinner() {
     char startAgain;
     if (gameMode == GameMode::HUMAN_VS_COMPUTER) {
         if (human.allShipsSunk()) {
-            std::cout << "Компьютер победил!" << std::endl;
+            std::cout << "\n[ Компьютер победил! ]\n" << std::endl;
+            std::cout << "\nДоска игрока:" << std::endl;
+            human.getOwnBoard().display();
+            std::cout << "\nДоска компьютера:" << std::endl;
+            computer1.getOwnBoard().display();
         }
         else {
-            std::cout << "Вы победили!" << std::endl;
+            std::cout << "\n[ Вы победили! ]\n" << std::endl;
+            std::cout << "\nДоска игрока:" << std::endl;
+            human.getOwnBoard().display();
+            std::cout << "\nДоска компьютера:" << std::endl;
+            computer1.getOwnBoard().display();
         }
     }
     else {
         if (computer1.allShipsSunk()) {
-            std::cout << "Компьютер 2 победил!" << std::endl;
+            std::cout << "\n[ Компьютер 2 победил! ]\n" << std::endl;
+            std::cout << "\nДоска компьютера 1:" << std::endl;
+            computer1.getOwnBoard().display();
+            std::cout << "\nДоска компьютера 2:" << std::endl;
+            computer2.getOwnBoard().display();
         }
         else if (computer2.allShipsSunk()) {
-            std::cout << "Компьютер 1 победил!" << std::endl;
+            std::cout << "\n[ Компьютер 1 победил! ]\n" << std::endl;
+            std::cout << "\nДоска компьютера 1:" << std::endl;
+            computer1.getOwnBoard().display();
+            std::cout << "\nДоска компьютера 2:" << std::endl;
+            computer2.getOwnBoard().display();
         }
     }
     /*
@@ -194,8 +223,8 @@ void Game::announceWinner() {
     if (startAgain == 'y') {
         start();
     }
-    else exit(0);
     */
+    exit(0);
 }
 
 /*void Game::handleStopMenu() {

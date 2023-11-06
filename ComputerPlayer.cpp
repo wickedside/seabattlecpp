@@ -11,7 +11,9 @@ void ComputerPlayer::setShootingMode(Mode mode) {
 }
 
 std::pair<int, int> ComputerPlayer::chooseShootCoordinate() {
-    std::cout << "Choosing shoot coordinate. LastHit: (" << lastHit.first << ", " << lastHit.second << "), shipDirectionDetermined: " << shipDirectionDetermined << std::endl;
+
+    //DEBUG
+    //std::cout << "Выбираем координату для выстрела. lastHit: (" << lastHit.first << ", " << lastHit.second << "), shipDirectionDetermined: " << shipDirectionDetermined << std::endl;
 
     if (shootingMode == Mode::INTELLIGENT) {
         if (initialHit.first == -1 && initialHit.second == -1) {
@@ -40,6 +42,7 @@ std::pair<int, int> ComputerPlayer::randomShoot() {
         y = rand() % 10;
     } while (opponentBoard.isCellShot(x, y));
 
+    std::cout << "\n[РАНДОМ] Случайный выстрел в координату (" << x << ", " << y << ").\n";
     return std::make_pair(x, y);
 }
 
@@ -47,54 +50,103 @@ std::pair<int, int> ComputerPlayer::shootAroundInitialHit() {
     const int dx[] = { -1,  0,  1,  0 };
     const int dy[] = { 0, -1,  0,  1 };
 
-    for (int i = 0; i < 4; ++i) {
-        int newX = initialHit.first + dx[i];
-        int newY = initialHit.second + dy[i];
+    std::vector<int> directions = { 0, 1, 2, 3 };
 
-        // Пропустить направление предыдущего промаха
-        if ((dx[i] == 0 && lastShotDirectionAttempted == 'v') ||
-            (dy[i] == 0 && lastShotDirectionAttempted == 'h')) {
-            continue;
-        }
+    // Убираем направления куда был сделан выстрел
+    for (int dir = directions.size() - 1; dir >= 0; --dir) {
+        int testX = initialHit.first + dx[dir];
+        int testY = initialHit.second + dy[dir];
 
-        if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10 && !opponentBoard.isCellShot(newX, newY)) {
-            lastShotDirectionAttempted = (dx[i] == 0) ? 'v' : 'h';
-            return std::make_pair(newX, newY);
+        // Проверка поля на выстрел или некорректность
+        if (testX < 0 || testX >= Board::getBoardSize() || testY < 0 || testY >= Board::getBoardSize() || opponentBoard.isCellShot(testX, testY)) {
+            directions.erase(directions.begin() + dir);
         }
     }
 
-    // Если все соседние клетки были уже атакованы, вернуться к случайной стрельбе
+    // Если направления остались, то выбираем рандомное из них для выстрела
+    if (!directions.empty()) {
+        // Выбираем рандомное направления для выстрела
+        int randomIndex = rand() % directions.size();
+        int dir = directions[randomIndex];
+        int newX = initialHit.first + dx[dir];
+        int newY = initialHit.second + dy[dir];
+        lastShotDirectionAttempted = (dx[dir] == 0) ? 'v' : 'h';
+        std::cout << "\n[ПОИСК НАПРАВЛЕНИЯ] Выстрел в координату (" << newX << ", " << newY << ").\n";
+        return std::make_pair(newX, newY);
+    }
+
+    // Если все направления были испробованы, то рандом выстрел.
+    //DEBUG
+    std::cout << "[ПОИСК НАПРАВЛЕНИЯ] Все направления уже заняты, стреляем рандомно.\n";
     return randomShoot();
 }
 
 std::pair<int, int> ComputerPlayer::shootInDirection() {
     int dx = 0, dy = 0;
 
-    // Определение направления последнего успешного выстрела
-    if (lastHitDirection == 'h') {
-        dx = (successfulShotDirection == 'h' && !reversedDirection) ? 1 : -1;
+    // Определяем направление стрельбы на основе последнего успешного выстрела и начального попадания
+    if (lastShotDirection == 'h') {
+        dx = (lastHit.first - initialHit.first > 0) ? 1 : -1; // Если последний выстрел был правее начального, идем вправо, иначе - влево
     }
-    else if (lastHitDirection == 'v') {
-        dy = (successfulShotDirection == 'v' && !reversedDirection) ? 1 : -1;
+    else if (lastShotDirection == 'v') {
+        dy = (lastHit.second - initialHit.second > 0) ? 1 : -1; // Если последний выстрел был ниже начального, идем вниз, иначе - вверх
     }
 
-    int newX = (reversedDirection) ? initialHit.first + dx : lastHit.first + dx;
-    int newY = (reversedDirection) ? initialHit.second + dy : lastHit.second + dy;
+    // Переключение на обратное направление, если достигнут край корабля
+    if (!isValidShot(lastHit.first + dx, lastHit.second + dy) && !reversedDirection) {
+        dx = -dx; // Меняем направление на обратное по горизонтали
+        dy = -dy; // Меняем направление на обратное по вертикали
+        reversedDirection = true; // Помечаем, что направление было изменено на обратное
+        // Сбрасываем последнее попадание до начального, чтобы начать стрельбу в обратном направлении
+        lastHit = initialHit;
+    }
 
-    if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10 && !opponentBoard.isCellShot(newX, newY)) {
+    // Вычисляем координаты следующего выстрела
+    int newX = lastHit.first + dx;
+    int newY = lastHit.second + dy;
+
+    if (isValidShot(newX, newY)) {
+        // Если следующий выстрел валиден, стреляем по этим координатам
         return std::make_pair(newX, newY);
     }
     else {
-        if (!reversedDirection) {
-            reversedDirection = true;
-            return shootInDirection(); // Пробуем стрелять в обратное направление
-        }
-        else {
-            reversedDirection = false; // сбросить флаг
-            resetShootingStrategy();   // Если стреляли в обратное направление и промахнулись, сбросим стратегию
-            return randomShoot();
-        }
+        // Если валидного направления для стрельбы не существует, сбрасываем стратегию и стреляем случайно
+        return resetStrategyAndRandomShoot();
     }
+}
+
+bool ComputerPlayer::isValidShot(int x, int y) {
+    return x >= 0 && x < Board::getBoardSize() && y >= 0 && y < Board::getBoardSize() && !opponentBoard.isCellShot(x, y);
+}
+
+//DEBUG
+/*std::pair<int, int> ComputerPlayer::shootFromInitialHitInReversedDirection() {
+    std::cout << "[Сработала функция shootFromInitialHitInReversedDirection].\n";
+    // Вычисляем новую цель в обратном направлении от начального попадания
+    int dx = lastShotDirection == 'h' ? -1 : 0;
+    int dy = lastShotDirection == 'v' ? -1 : 0;
+    int newX = initialHit.first + dx;
+    int newY = initialHit.second + dy;
+
+    // Проверяем, что новая цель валидна
+    if (isValidShot(newX, newY)) {
+        std::cout << "[Возвращаем новую валидную цель - " << newX << "," << newY << "]" << std::endl;
+        return std::make_pair(newX, newY); // Возвращаем новую валидную цель
+    } else {
+        std::cout << "[!] [Обратное направление невалидно " << newX << "," << newY << "; сбрасываем стратегию и стреляем случайно]" << std::endl;
+        // Если обратное направление невалидно, сбрасываем стратегию и стреляем случайно
+        return resetStrategyAndRandomShoot();
+    }
+}
+*/
+
+std::pair<int, int> ComputerPlayer::resetStrategyAndRandomShoot() {
+    //DEBUG
+    std::cout << "[СБРОС СТРАТЕГИИ] Сброс стратегии стрельбы и переход к случайному выстрелу.\n";
+    // Сбрасываем стратегию
+    resetShootingStrategy();
+    // Возвращаем случайную координату для выстрела
+    return randomShoot();
 }
 
 void ComputerPlayer::placeShips() {
@@ -121,49 +173,64 @@ void ComputerPlayer::addSurroundingCoordinates(int x, int y) {
 }
 
 void ComputerPlayer::resetShootingStrategy() {
-    shootingMode = Mode::RANDOM;
     lastHit = { -1, -1 };
     initialHit = { -1, -1 }; // Сброс первого попадания
     shipDirectionDetermined = false;
-    reversedDirection = false; // Добавлено
+    reversedDirection = false; // Сброс флага обратного направления
+    consecutiveHits = 0; // Сброс подсчета последовательных попаданий
     intelligentTargets.clear();
 }
 
 void ComputerPlayer::registerHit(int x, int y) {
+    lastHit = { x, y }; // Обновляем последнее попадание
+    //DEBUG
+    std::cout << "[ПОПАДАНИЕ] Зарегистрировано попадание в: (" << x << ", " << y << ")." << std::endl;
+
     if (initialHit.first == -1 && initialHit.second == -1) {
-        // Это первое попадание по кораблю
-        initialHit = { x, y };
-        lastHit = { x, y };
-        shipDirectionDetermined = false;
+        initialHit = lastHit; // Устанавливаем начальное попадание, если это первое попадание
+        //DEBUG
+        std::cout << "[ПОПАДАНИЕ] Начальное попадание установлено в: (" << x << ", " << y << ")." << std::endl;
     }
     else {
-        // Это последующее попадание по кораблю
-        lastHit = { x, y };
-        if (x == initialHit.first) {
-            lastHitDirection = 'v'; // вертикальное направление
-            successfulShotDirection = 'v'; // обновить направление последнего успешного выстрела
+        // Определяем направление корабля только после второго попадания по линии с начальным попаданием
+        if (!shipDirectionDetermined && (x == initialHit.first || y == initialHit.second)) {
+            shipDirectionDetermined = true;
+            lastShotDirection = (x == initialHit.first) ? 'v' : 'h';
+            //DEBUG
+            std::cout << "[ПОПАДАНИЕ] Определено направление корабля: " << (lastShotDirection == 'v' ? "вертикальное" : "горизонтальное") << std::endl;
         }
-        else {
-            lastHitDirection = 'h'; // горизонтальное направление
-            successfulShotDirection = 'h'; // обновить направление последнего успешного выстрела
-        }
-        shipDirectionDetermined = true;
+    }
+
+    if (shipDirectionDetermined) {
+        lastHit = { x, y }; // Обновляем последнее попадание для продолжения стрельбы вдоль корабля
+        consecutiveHits++; // Увеличиваем счётчик последовательных попаданий
+        std::cout << "[ПОПАДАНИЕ] Количество последовательных попаданий увеличено: " << consecutiveHits << std::endl;
     }
 }
 
 void ComputerPlayer::registerMiss() {
+    //DEBUG
+     std::cout << "[ПРОМАХ] Зарегистрирован промах. Текущее состояние - Направление корабля определено: " << (shipDirectionDetermined ? "да" : "нет")
+         << ", Обратное направление: " << (reversedDirection ? "да" : "нет") << std::endl;
+
+    // Если направление было определено и мы еще не стреляли в обратном направлении, пытаемся его изменить
     if (shipDirectionDetermined && !reversedDirection) {
-        reversedDirection = true; // Попробуем стрелять в обратное направление на следующем ходу
+        reversedDirection = true; // Помечаем необходимость стрелять в обратном направлении
+        lastHit = initialHit; // Возвращаемся к начальному попаданию, чтобы попытаться стрелять в другом направлении
+        
+        //DEBUG 
+        std::cout << "[ПРОМАХ] Изменение направления стрельбы с начального попадания." << std::endl;
     }
-    else if (reversedDirection) {
-        resetShootingStrategy(); // Если мы уже пробовали обратное направление и промахнулись, сбросим стратегию
+    else if (shipDirectionDetermined && reversedDirection) {
+        // Если направление было определено и мы уже стреляли в обратном направлении, но это был промах, сбрасываем стратегию
+        resetShootingStrategy(); // Сброс стратегии стрельбы
+
+        //DEBUG
+        std::cout << "[ПРОМАХ] Стратегия стрельбы сброшена после изменения направления и промаха." << std::endl;
     }
+    // Если направление не было определено, продолжаем стрелять случайным образом
 }
 
 void ComputerPlayer::resetInitialHit() {
     initialHit = { -1, -1 };
-}
-
-std::pair<int, int> ComputerPlayer::getLastHit() const {
-    return lastHit;
 }

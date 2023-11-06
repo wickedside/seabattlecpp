@@ -12,12 +12,12 @@ HumanPlayer::~HumanPlayer() {
 std::pair<int, int> HumanPlayer::chooseShootCoordinate() {
     int x, y;
     do {
-        std::cout << "Введите координату X для выстрела (0-9): ";
+        std::cout << "[?] Введите координату X для выстрела (0-9): ";
         std::cin >> x;
-        std::cout << "Введите координату Y для выстрела (0-9): ";
+        std::cout << "[?] Введите координату Y для выстрела (0-9): ";
         std::cin >> y;
         if (opponentBoard.isCellShot(x, y)) {
-            std::cout << "Вы уже стреляли в эти координаты или эта клетка помечена как промах. Попробуйте еще раз.\n";
+            std::cout << "[!] Вы уже стреляли в эти координаты или эта клетка помечена как промах. Попробуйте еще раз.\n";
         }
     } while (opponentBoard.isCellShot(x, y));
 
@@ -37,20 +37,20 @@ void Player::placeShip(int size, int count, const std::string& description) {
     for (int i = 0; i < count; ++i) {
         bool isPlaced = false;
         while (!isPlaced) {
-            std::cout << "Текущая расстановка кораблей на доске:\n";
+            std::cout << "\n -> Текущая расстановка кораблей на доске:\n";
             ownBoard.display();  // Выводим текущее состояние доски
             std::cout << "\n";
 
-            std::cout << "Разместите " << description << " корабль (" << (i + 1) << " из " << count << "):\n";
+            std::cout << "\n -> Разместите " << description << " корабль (" << (i + 1) << " из " << count << "):\n";
 
             int x, y;
             char direction;
 
-            std::cout << "Введите начальную координату X (0-9): ";
+            std::cout << "[?] Введите начальную координату X (0-9): ";
             std::cin >> x;
-            std::cout << "Введите начальную координату Y (0-9): ";
+            std::cout << "[?] Введите начальную координату Y (0-9): ";
             std::cin >> y;
-            std::cout << "Введите направление корабля (h - горизонтальное, v - вертикальное): ";
+            std::cout << "[?] Введите направление корабля (h - горизонтальное, v - вертикальное): ";
             std::cin >> direction;
 
             // Используйте ownBoard для вызова методов canPlaceShip и placeShip
@@ -59,7 +59,7 @@ void Player::placeShip(int size, int count, const std::string& description) {
                 isPlaced = true;
             }
             else {
-                std::cout << "Не удается разместить корабль в выбранных координатах. Попробуйте еще раз.\n";
+                std::cout << "[!] Не удается разместить корабль в выбранных координатах. Попробуйте еще раз.\n";
             }
         }
     }
